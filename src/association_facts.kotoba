@@ -2,13 +2,18 @@
   (:export [main association-covered? entry-count entry-field topic-count
             topic by-topic-count by-topic-id coverage-note]))
 
-(defn association-covered? [association :string] :i64
+(defn association-covered? [association :string] :bool
+  ;; `:bool`, not `:i64`. `string=?` returns a boolean and `bool is a type, not
+  ;; a number` is permanent in this language -- the `:i64` here was written
+  ;; against a compiler old enough that predicates reduced to 1/0, and it stops
+  ;; the module compiling for ANY target on a current one:
+  ;; `expression type mismatch: expected i64, got bool`.
   (string=? association "acc"))
 (defn entry-count [association :string] :i64
   (if (association-covered? association) 2 0))
-(defn valid-entry? [association :string index :i64] :i64
+(defn valid-entry? [association :string index :i64] :bool
   (if (association-covered? association)
-    (if (= index 0) 1 (if (= index 1) 1 0)) 0))
+    (if (= index 0) true (if (= index 1) true false)) false))
 
 (defn entry-field [association :string index :i64 field :string]
   [:option :string]
